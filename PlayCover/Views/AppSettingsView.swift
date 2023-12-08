@@ -81,7 +81,9 @@ struct AppSettingsView: View {
                     }
                     .disabled(!(hasPlayTools ?? true))
                 BypassesView(settings: $viewModel.settings,
-                             hasPlayTools: $hasPlayTools)
+                             hasPlayTools: $hasPlayTools,
+                             hasIntrospection: viewModel.app.introspection(),
+                             app: viewModel.app)
                     .tabItem {
                         Text("settings.tab.bypasses")
                     }
@@ -90,7 +92,8 @@ struct AppSettingsView: View {
                          closeView: $closeView,
                          hasPlayTools: $hasPlayTools,
                          hasAlias: $hasAlias,
-                         app: viewModel.app)
+                         app: viewModel.app,
+                         applicationCategoryType: viewModel.app.info.applicationCategoryType)
                     .tabItem {
                         Text("settings.tab.misc")
                     }
@@ -99,7 +102,7 @@ struct AppSettingsView: View {
                         Text("settings.tab.info")
                     }
             }
-            .frame(minWidth: 450, minHeight: 200)
+            .frame(minWidth: 500, minHeight: 250)
             HStack {
                 Spacer()
                 Button("settings.resetSettings") {
@@ -150,9 +153,13 @@ struct KeymappingView: View {
                     Toggle("settings.toggle.km", isOn: $settings.settings.keymapping)
                         .help("settings.toggle.km.help")
                     Spacer()
-                    Toggle("settings.toggle.mm", isOn: $settings.settings.mouseMapping)
-                        .help("settings.toggle.mm.help")
-                        .disabled(!settings.settings.keymapping)
+                    Toggle("settings.toggle.autoKM", isOn: $settings.settings.noKMOnInput)
+                        .help("settings.toggle.autoKM.help")
+                }
+                HStack {
+                    Toggle("settings.toggle.enableScrollWheel", isOn: $settings.settings.keymapping)
+                        .help("settings.toggle.enableScrollWheel.help")
+                    Spacer()
                 }
                 HStack {
                     Text(String(
@@ -176,9 +183,21 @@ struct GraphicsView: View {
     @State var customWidth = 1920
     @State var customHeight = 1080
 
+    @State var showResolutionWarning = false
+
     static var number: NumberFormatter {
         let formatter = NumberFormatter()
         formatter.numberStyle = .none
+        return formatter
+    }
+
+    @State var customScaler = 2.0
+    static var fractionFormatter: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 1
+        formatter.minimumFractionDigits = 1
+        formatter.decimalSeparator = "."
         return formatter
     }
 
@@ -198,6 +217,18 @@ struct GraphicsView: View {
                         Text("iPhone 14 Pro Max | A16 | 6GB").tag("iPhone15,3")
                     }
                     .frame(width: 250)
+                }
+                HStack {
+                    if showResolutionWarning {
+                        Spacer()
+                        let highResIcon = Image(systemName: "exclamationmark.triangle")
+                        let warning = NSLocalizedString("settings.highResolution", comment: "")
+
+                        Text("\(highResIcon) \(warning)")
+                            .font(.caption)
+                    } else {
+                        Spacer()
+                    }
                 }
                 HStack {
                     Text("settings.picker.adaptiveRes")
@@ -272,6 +303,48 @@ struct GraphicsView: View {
                     }
                 }
                 HStack {
+                    Text("settings.picker.scaler")
+                    Spacer()
+                    Stepper {
+                        TextField(
+                            "settings.text.scaler",
+                            value: $customScaler,
+                            formatter: GraphicsView.fractionFormatter,
+                            onCommit: {
+                                Task { @MainActor in
+                                    NSApp.keyWindow?.makeFirstResponder(nil)
+                                }
+                            })
+                            .frame(width: 125)
+                    } onIncrement: {
+                        customScaler += 0.1
+                    } onDecrement: {
+                        if customScaler > 0.5 {
+                            customScaler -= 0.1
+                        }
+                    }
+                }
+                VStack(alignment: .leading) {
+                    if #available(macOS 13.2, *) {
+                        HStack {
+                            Toggle("settings.picker.windowFix", isOn: $settings.settings.inverseScreenValues)
+                                .help("settings.picker.windowFix.help")
+                                .onChange(of: settings.settings.inverseScreenValues) { _ in
+                                    settings.settings.windowFixMethod = 0
+                                }
+                            Spacer()
+                            // Dropdown to choose fix method
+                            Picker("", selection: $settings.settings.windowFixMethod) {
+                                Text("settings.picker.windowFixMethod.0").tag(0)
+                                Text("settings.picker.windowFixMethod.1").tag(1)
+                            }
+                            .frame(alignment: .leading)
+                            .help("settings.picker.windowFixMethod.help")
+                            .disabled(!settings.settings.inverseScreenValues)
+                            .disabled(settings.settings.resolution != 0)
+                        }
+                        Spacer()
+                    }
                     Toggle("settings.toggle.disableDisplaySleep", isOn: $settings.settings.disableTimeout)
                         .help("settings.toggle.disableDisplaySleep.help")
                     Spacer()
@@ -282,6 +355,7 @@ struct GraphicsView: View {
             .onAppear {
                 customWidth = settings.settings.windowWidth
                 customHeight = settings.settings.windowHeight
+                customScaler = settings.settings.customScaler
             }
             .onChange(of: settings.settings.resolution) { _ in
                 setResolution()
@@ -293,6 +367,9 @@ struct GraphicsView: View {
                 setResolution()
             }
             .onChange(of: customHeight) { _ in
+                setResolution()
+            }
+            .onChange(of: customScaler) { _ in
                 setResolution()
             }
         }
@@ -325,12 +402,16 @@ struct GraphicsView: View {
             height = customHeight
         // Adaptive resolution = Off
         default:
-            width = 1920
             height = 1080
+            width = 1920
         }
 
         settings.settings.windowWidth = width
         settings.settings.windowHeight = height
+        settings.settings.customScaler = customScaler
+
+        showResolutionWarning = Double(width * height) * customScaler >= 2621440 * 2.0
+        // Tends to crash when the number of pixels exceeds that
     }
 
     func getWidthFromAspectRatio(_ height: Int) -> Int {
@@ -368,6 +449,10 @@ struct BypassesView: View {
     @Binding var settings: AppSettings
     @Binding var hasPlayTools: Bool?
 
+    @State var hasIntrospection: Bool
+
+    var app: PlayApp
+
     var body: some View {
         ScrollView {
             VStack {
@@ -386,8 +471,17 @@ struct BypassesView: View {
                         .help("settings.toggle.jbBypass.help")
                     Spacer()
                 }
+                Spacer()
+                HStack {
+                    Toggle("settings.toggle.introspection", isOn: $hasIntrospection)
+                        .help("settings.toggle.introspection.help")
+                    Spacer()
+                }
             }
             .padding()
+        }
+        .onChange(of: hasIntrospection) {_ in
+            _ = app.introspection(set: hasIntrospection)
         }
     }
 }
@@ -402,9 +496,34 @@ struct MiscView: View {
 
     var app: PlayApp
 
+    @State var applicationCategoryType: LSApplicationCategoryType
+
     var body: some View {
         ScrollView {
             VStack {
+                HStack {
+                    Text("settings.applicationCategoryType")
+                    Spacer()
+                    Picker("", selection: $applicationCategoryType) {
+                        ForEach(LSApplicationCategoryType.allCases, id: \.rawValue) { value in
+                            Text(value.localizedName)
+                                .tag(value)
+                        }
+                    }
+                    .frame(width: 225)
+                    .onChange(of: applicationCategoryType) { _ in
+                        app.info.applicationCategoryType = applicationCategoryType
+                        Task(priority: .userInitiated) {
+                            do {
+                                try Shell.signApp(app.executable)
+                            } catch {
+                                Log.shared.error(error)
+                            }
+                        }
+                    }
+                }
+                Spacer()
+                    .frame(height: 20)
                 HStack {
                     Toggle("settings.toggle.discord", isOn: $settings.settings.discordActivity.enable)
                     Spacer()
@@ -452,7 +571,7 @@ struct MiscView: View {
                     .frame(height: 20)
                 HStack {
                     HStack {
-                        Toggle("settings.toggle.hud", isOn: $settings.metalHudEnabled)
+                        Toggle("settings.toggle.hud", isOn: $settings.settings.metalHUD)
                             .disabled(!isVenturaGreater())
                             .help(!isVenturaGreater() ? "settings.unavailable.hud" : "")
                         Spacer()
@@ -483,6 +602,7 @@ struct MiscView: View {
                             }
 
                             Task { @MainActor in
+                                AppsVM.shared.filteredApps = []
                                 AppsVM.shared.fetchApps()
                             }
                         }
@@ -498,6 +618,16 @@ struct MiscView: View {
                             hasAlias = false
                         }
                     }
+                }
+                Spacer()
+                    .frame(height: 20)
+                // swiftlint:disable:next todo
+                // TODO: Test and remove before 3.0 release
+                HStack {
+                    Toggle("settings.toggle.rootWorkDir", isOn: $settings.settings.rootWorkDir)
+                        .disabled(!(hasPlayTools ?? true))
+                        .help("settings.toggle.rootWorkDir.help")
+                    Spacer()
                 }
             }
             .padding()
@@ -538,6 +668,11 @@ struct InfoView: View {
                 Text("settings.info.bundleVersion")
                 Spacer()
                 Text("\(info.bundleVersion)")
+            }
+            HStack {
+                Text("settings.applicationCategoryType") + Text(":")
+                Spacer()
+                Text("\(info.applicationCategoryType.rawValue)")
             }
             HStack {
                 Text("settings.info.executableName")

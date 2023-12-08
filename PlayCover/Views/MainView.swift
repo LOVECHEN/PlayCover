@@ -14,6 +14,8 @@ struct MainView: View {
     @EnvironmentObject var store: StoreVM
     @EnvironmentObject var integrity: AppIntegrity
 
+    @ObservedObject var keyCoverObserved = KeyCoverObservable.shared
+
     @Binding public var isSigningSetupShown: Bool
 
     @State private var selectedView: Int? = -1
@@ -22,6 +24,9 @@ struct MainView: View {
     @State private var collapsed: Bool = false
     @State private var selectedBackgroundColor: Color = Color.accentColor
     @State private var selectedTextColor: Color = Color.black
+
+    @ObservedObject private var URLObserved = URLObservable.shared
+
     var body: some View {
         GeometryReader { viewGeom in
             NavigationView {
@@ -37,6 +42,13 @@ struct MainView: View {
                             .environmentObject(store),
                                        tag: 2, selection: self.$selectedView) {
                             Label("sidebar.ipaLibrary", systemImage: "arrow.down.circle")
+                        }
+                    }
+                    .toolbar {
+                        ToolbarItem { // Sits on the left by default
+                            Button(action: toggleSidebar, label: {
+                                Image(systemName: "sidebar.leading")
+                            })
                         }
                     }
                     .onChange(of: sidebarGeom.size) { newSize in
@@ -81,14 +93,7 @@ struct MainView: View {
                 .background(SplitViewAccessor(sideCollapsed: $collapsed))
             }
             .onAppear {
-                self.selectedView = 1
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigation) {
-                    Button(action: toggleSidebar, label: {
-                        Image(systemName: "sidebar.leading")
-                    })
-                }
+                self.selectedView = URLObserved.type == .source ? 2 : 1
             }
             .overlay {
                 HStack {
@@ -120,6 +125,12 @@ struct MainView: View {
             .sheet(isPresented: $isSigningSetupShown) {
                 SignSetupView(isSigningSetupShown: $isSigningSetupShown)
             }
+            .onChange(of: URLObserved.action) { _ in
+                self.selectedView = URLObserved.type == .source ? 2 : self.selectedView
+            }
+            .sheet(isPresented: $keyCoverObserved.isKeyCoverUnlockingPromptShown) {
+                KeyCoverUnlockingPrompt()
+            }
         }
         .frame(minWidth: 675, minHeight: 330)
     }
@@ -150,6 +161,7 @@ struct SplitViewAccessor: NSViewRepresentable {
             var sview = superview
 
             // Find split view through hierarchy
+            // swiftlint:disable:next force_unwrapping
             while sview != nil, !sview!.isKind(of: NSSplitView.self) {
                 sview = sview?.superview
             }

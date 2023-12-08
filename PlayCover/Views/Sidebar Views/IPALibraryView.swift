@@ -19,6 +19,8 @@ struct IPALibraryView: View {
     @State private var selected: StoreAppData?
     @State private var addSourcePresented = false
 
+    @ObservedObject private var URLObserved = URLObservable.shared
+
     var body: some View {
         Group {
             if !NetworkVM.isConnectedToNetwork() {
@@ -118,7 +120,11 @@ struct IPALibraryView: View {
         }
         .searchable(text: $searchString, placement: .toolbar)
         .onChange(of: searchString) { value in
-            uif.searchText = value
+            storeVM.searchText = value
+            storeVM.fetchApps()
+        }
+        .onAppear {
+            storeVM.searchText = ""
             storeVM.fetchApps()
         }
         .onChange(of: isList, perform: { value in
@@ -127,6 +133,12 @@ struct IPALibraryView: View {
         .sheet(isPresented: $addSourcePresented) {
             AddSourceView(addSourceSheet: $addSourcePresented)
                 .environmentObject(storeVM)
+        }
+        .onChange(of: URLObserved.type) {_ in
+            addSourcePresented = URLObserved.type == .source
+        }
+        .onAppear {
+            addSourcePresented = URLObserved.type == .source
         }
     }
 }

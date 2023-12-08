@@ -16,15 +16,17 @@ class AppsVM: ObservableObject {
 
     @Published var filteredApps: [PlayApp] = []
     @Published var apps: [PlayApp] = []
-
+    @Published var searchText: String = ""
     @Published var updatingApps = true
 
     func fetchApps() {
         Task { @MainActor in
             updatingApps = true
-            var result: [PlayApp] = []
+
+            filteredApps.removeAll()
+            apps.removeAll()
+
             do {
-                let containers = try AppContainer.containers()
                 let directoryContents = try FileManager.default
                     .contentsOfDirectory(at: PlayTools.playCoverContainer, includingPropertiesForKeys: nil, options: [])
 
@@ -36,11 +38,12 @@ class AppsVM: ObservableObject {
                                                                   .appendingPathExtension("plist")
                                                                   .path) {
                         let app = PlayApp(appUrl: sub)
-                        if let container = containers[app.info.bundleIdentifier] {
-                            app.container = container
-                            print("Application installed under:", sub.path)
+                        print("Application installed under:", sub.path)
+
+                        apps.append(app)
+                        if searchText.isEmpty || app.searchText.contains(searchText.lowercased()) {
+                            filteredApps.append(app)
                         }
-                        result.append(app)
                     }
                 }
 
@@ -48,22 +51,9 @@ class AppsVM: ObservableObject {
                 print(error)
             }
 
-            apps = result
+            filteredApps.sort(by: { $0.name.lowercased() < $1.name.lowercased() })
 
-            updateApps(result)
+            updatingApps = false
         }
-    }
-
-    @MainActor func updateApps(_ newApps: [PlayApp]) {
-        updatingApps = true
-        self.filteredApps.removeAll()
-        var filteredApps = newApps
-
-        if !uif.searchText.isEmpty {
-            filteredApps = newApps.filter({ $0.searchText.contains(uif.searchText.lowercased()) })
-        }
-
-        self.filteredApps.append(contentsOf: filteredApps)
-        updatingApps = false
     }
 }

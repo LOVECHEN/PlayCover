@@ -185,22 +185,22 @@
 "settings.toggle.discord" = "Activer l'activité Discord";
 
 /* (No Comment) */
-"settings.toggle.jbBypass" = "Activer l'évitement Jailbreak (Alpha)";
+"settings.toggle.jbBypass" = "Activer l'évitement Jailbreak (Expérimental)";
 
 /* (No Comment) */
 "settings.toggle.km" = "Activer le mappage de touches";
 
 /* (No Comment) */
-"soundAlert.failureText" = "Failed to set current output device's sample rate to 48 KHz. You can manually set sample rate in ‘Audio MIDI Setup’ app";
+"soundAlert.failureText" = "Une error a occurée en essayant de régler la fréquence d'échantillonnage du périphérique de sortie actuel à 48 kHz. Vous pouvez régler manuellement la fréquence d'échantillonnage dans l'application Audio MIDI Setup";
 
 /* (No Comment) */
-"soundAlert.informativeText" = "Votre sortie audio actuelle n'a pas un taux d'échantillonnage de 48 ou 44.1 KHz ! Des erreurs peuvent survenir. Voulez-vous changer le taux d'échantillonnage de votre sortie audio actuelle à 48 KHz ?";
+"soundAlert.informativeText" = "Votre sortie audio actuelle n'a pas un taux d'échantillonnage de 48 ou 44.1 kHz ! Des erreurs peuvent survenir. Voulez-vous changer le taux d'échantillonnage de votre sortie audio actuelle à 48 kHz ?";
 
 /* (No Comment) */
 "soundAlert.messageText" = "Paramètres Audio Incorrects Détectés !";
 
 /* (No Comment) */
-"soundAlert.successText" = "Définir le taux d'échantillonnage de votre sortie audio à 48 KHz";
+"soundAlert.successText" = "Définir le taux d'échantillonnage de votre sortie audio à 48 kHz";
 
 /* (No Comment) */
 "storeAccount.deleteAcc" = "Supprimer un compte";
@@ -254,8 +254,6 @@
 "settings.tab.info" = "Info";
 "settings.tab.km" = "Touches";
 "settings.toggle.km.help" = "Ajoutez le mappage de touches aux jeux tactiles uniquement. Utilisez Commande + K pour ouvrir le menu de l'éditeur.";
-"settings.toggle.mm" = "Mappage de la souris";
-"settings.toggle.mm.help" = "Ajoutez des commandes de souris qui simule les mouvements tactiles. Utilisez Commande + K pour ouvrir le menu de l'éditeur.";
 "settings.tab.graphics" = "Graphiques";
 "settings.picker.adaptiveRes" = "Résolution :";
 "settings.picker.adaptiveRes.help" = "Adapte la fenêtre de l'application pour s'adapter à votre résolution";
@@ -263,7 +261,6 @@
 "settings.picker.adaptiveRes.1" = "Auto (Basé sur l'affichage)";
 "settings.picker.adaptiveRes.5" = "Personnalisé";
 "settings.toggle.disableDisplaySleep.help" = "Empêcher l'affichage de s'éteindre pendant que cette application est ouvert";
-"settings.tab.jbBypass" = "Évitement Jailbreak";
 "settings.toggle.jbBypass.help" = "Tente de contourner la détection jailbreak dans certains apps (Non garanti de fonctionner tout le temps)";
 "settings.info.displayName" = "Nom d'affichage :";
 "settings.info.bundleName" = "Nom d'application :";
@@ -362,10 +359,62 @@
 "settings.toggle.lldb" = "Ouvrir avec LLDB";
 "alert.differentBundleIdKeymap.message" = "Le keymap peut avoir été créé pour une autre application.";
 "settings.toggle.lldbWithTerminal" = "Ouvrir dans le terminal";
-"settings.unavailable.hud" = "Metal HUD unavailable";
-"error.failedToStripBinary" = "Could not find ARM64 arch in fat binary!";
-"settings.playChain.enable" = "Enable PlayChain (experimental)";
-"settings.playChain.help" = "Enable PlayChain support for this application, allowing it to (partially) use Apple Keychain Services";
-"settings.playChain.debugging" = "PlayChain debugging";
-"playapp.noSources.title" = "No IPAs Installed";
-"playapp.noSources.subtitle" = "You currently have no IPAs installed. Click the button below to import one.";
+"settings.unavailable.hud" = "Metal HUD indisponible";
+"error.failedToStripBinary" = "Impossible de trouver l'architecture ARM64 dans le binaire fat !";
+"settings.playChain.enable" = "Activer PlayChain (Expérimental)";
+"settings.playChain.help" = "Activer la prise en charge de PlayChain pour cette application, lui permettant d'utiliser (partiellement) les services Apple Keychain";
+"settings.playChain.debugging" = "Débogage de PlayChain";
+"playapp.noSources.title" = "Aucun IPA installé";
+"playapp.noSources.subtitle" = "Actuellement, vous n'avez aucun IPA installé. Cliquez sur le bouton ci-dessous pour en importer un.";
+"settings.tab.bypasses" = "Contournements";
+"settings.addToLaunchpad" = "Ajouter à Launchpad";
+"settings.removeFromLaunchpad" = "Supprimer de Launchpad";
+"playapp.download.integrityCheck" = "Vérification de l'intégrité des fichiers :";
+"playapp.download.differentChecksum" = "Différentes sommes de contrôle ! Voulez-vous continuer l’installation ?";
+"playapp.download.differentChecksumDesc" = "Attendu \"%@\", obtenu \"%@\"";
+"playapp.progress.canceled" = "Annulé";
+"ipaLibrary.noNetworkConnection.required" = "IPA Library requires internet connection";
+"playapp.clearPlayChain" = "Clear PlayChain Data";
+"playapp.importIPA" = "Import IPA";
+"preferences.toggle.removePlayChain" = "Supprimer PlayChain";
+"preferences.popover.duplicate" = "Duplicate Link";
+"alert.app.clearPlayChain" = "All PlayChain data will be erased. You may need to login to the app again. Do you wish to continue?";
+"button.Reload" = "Reload";
+"settings.highResolution" = "High resolution may cause crashing";
+"settings.picker.windowFix" = "Fix window display issues";
+"settings.picker.windowFix.help" = "Apply window fixes that may helps your apps display normally";
+"settings.picker.windowFixMethod.0" = "Normal";
+"settings.picker.windowFixMethod.1" = "Alternate";
+"preferences.popover.checking" = "Vérification de l'URL";
+"settings.toggle.introspection" = "Insert Introspection libraries";
+"settings.toggle.introspection.help" = "Add the system introspection libraries to the app. Known to fix issues with some apps not starting correctly";
+"settings.picker.scaler" = "Resolution Scaler";
+"keycover.masterPassword" = "Master Password";
+"keycover.confirmMasterPassword" = "Confirm Master Password";
+"keycover.oldMasterPassword" = "Current Master Password";
+"keycover.error.blankPassword" = "Password cannot be blank";
+"keycover.error.notMatch" = "Passwords do not match";
+"keycover.error.incorrectPassword" = "Incorrect Password";
+"keycover.status.title" = "KeyCover Status:";
+"keycover.status.managedPassword" = "Enabled with Managed Password";
+"keycover.status.userPassword" = "Enabled with User Password";
+"keycover.status.chainCount" = "KeyCover Chain Status: ";
+"keycover.status.unlockedCount %@ %@" = "%@ unlocked chains in %@ total";
+"keycover.button.lockAll" = "Lock All Chains";
+"keycover.button.changePassword" = "Change Master Password";
+"button.Enable" = "Enable";
+"button.Reset" = "Reset";
+"button.Unlock" = "Unlock";
+"settings.toggle.rootWorkDir" = "Start app at root directory";
+"settings.toggle.rootWorkDir.help" = "Change the working directory of the app to / just like on iOS. Turn this off if the app misbehave";
+"keycover.toggle.startupPrompt" = "Prompt for KeyCover at startup";
+"keycover.toggle.startupPrompt.help" = "KeyCover will prompt for your master password when you launch the application. If this is disabled, it will be prompted when you launch an app that uses PlayChain.";
+"keycover.setup.useGeneratedKey" = "Managed Automatically";
+"keycover.setup.useUserKey" = "Use my own key";
+"keycover.setup.encryptionKey" = "Encryption Key: ";
+"keycover.setupPrompt.title" = "Enter a master password to use for KeyCover";
+"keycover.changePasswordPrompt.title" = "Enter your old master password and a new one to update your KeyCover encryption key";
+"keycover.removePrompt.title" = "Enter your master password to remove KeyCover encryption";
+"keycover.unlockPrompt.title" = "Enter your master password to unlock KeyCover";
+"keycover.alert.title" = "Keychain was not unlocked";
+"keycover.alert.content" = "Keychain access has been disabled for the current session";

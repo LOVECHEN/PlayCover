@@ -18,7 +18,8 @@ class Uninstaller {
     private static let pruneURLs: [URL] = [
         PlayTools.playCoverContainer.appendingPathComponent("App Settings"),
         PlayTools.playCoverContainer.appendingPathComponent("Entitlements"),
-        PlayTools.playCoverContainer.appendingPathComponent("Keymapping")
+        PlayTools.playCoverContainer.appendingPathComponent("Keymapping"),
+        PlayTools.playCoverContainer.appendingPathComponent("PlayChain")
     ]
     private static let otherPruneURLs: [URL] = [
         PlayApp.aliasDirectory
@@ -50,6 +51,7 @@ class Uninstaller {
     static func uninstallPopup(_ app: PlayApp) {
         if UninstallPreferences.shared.showUninstallPopup {
             let boxmakers: [(String, String)] = [
+                ("removePlayChain", NSLocalizedString("preferences.toggle.removePlayChain", comment: "")),
                 ("removeAppEntitlements", NSLocalizedString("preferences.toggle.removeEntitlements", comment: "")),
                 ("removeAppSettings", NSLocalizedString("preferences.toggle.removeSetting", comment: "")),
                 ("removeAppKeymap", NSLocalizedString("preferences.toggle.removeKeymap", comment: "")),
@@ -67,7 +69,7 @@ class Uninstaller {
 
             let viewWidth = checkboxes.max(by: { $0.view.frame.width < $1.view.frame.width })?.view.frame.width
 
-            let settingsView = NSStackView(frame: NSRect(x: 0, y: 0, width: viewWidth!, height: viewY))
+            let settingsView = NSStackView(frame: NSRect(x: 0, y: 0, width: viewWidth ?? 0, height: viewY))
 
             for checkboxhelper in checkboxes {
                 settingsView.addSubview(checkboxhelper.view)
@@ -126,6 +128,17 @@ class Uninstaller {
             FileManager.default.delete(at: app.entitlements)
         }
 
+        if UninstallPreferences.shared.removePlayChain {
+            let url = PlayTools.playCoverContainer
+                .appendingPathComponent("PlayChain")
+                .appendingPathComponent(app.info.bundleIdentifier)
+            FileManager.default.delete(at: url)
+
+            // KeyCover encrypted chain
+            let keyCoverURL = url.appendingPathExtension("keyCover")
+            FileManager.default.delete(at: keyCoverURL)
+        }
+
         app.removeAlias()
         app.deleteApp()
     }
@@ -140,27 +153,23 @@ class Uninstaller {
         let bundleIds = AppsVM.shared.apps.map { $0.info.bundleIdentifier }
         let appNames = AppsVM.shared.apps.map { $0.info.displayName }
 
-        do {
-            for url in pruneURLs {
-                try url.enumerateContents { file, _ in
-                    let bundleId = file.deletingPathExtension().lastPathComponent
-                    if !bundleIds.contains(bundleId) {
-                        clearExternalCache(bundleId)
+        for url in pruneURLs {
+            url.enumerateContents(options: []) { file, _ in
+                let bundleId = file.deletingPathExtension().lastPathComponent
+                if !bundleIds.contains(bundleId) {
+                    clearExternalCache(bundleId)
 
-                        FileManager.default.delete(at: file)
-                    }
+                    FileManager.default.delete(at: file)
                 }
             }
-            for url in otherPruneURLs {
-                try url.enumerateContents { file, _ in
-                    let appName = file.deletingPathExtension().lastPathComponent
-                    if !appNames.contains(appName) {
-                        FileManager.default.delete(at: file)
-                    }
+        }
+        for url in otherPruneURLs {
+            url.enumerateContents(options: []) { file, _ in
+                let appName = file.deletingPathExtension().lastPathComponent
+                if !appNames.contains(appName) {
+                    FileManager.default.delete(at: file)
                 }
             }
-        } catch {
-            Log.shared.error(error)
         }
     }
 }

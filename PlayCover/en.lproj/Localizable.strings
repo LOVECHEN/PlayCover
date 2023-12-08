@@ -4,6 +4,7 @@
 "playapp.showInFinder" = "Show in Finder";
 "playapp.openCache" = "Open App Data";
 "playapp.clearCache" = "Clear App Data";
+"playapp.clearPlayChain" = "Clear PlayChain Data";
 "playapp.importIPA" = "Import IPA";
 "playapp.importKm" = "Import Keymapping";
 "playapp.exportKm" = "Export Keymapping";
@@ -40,6 +41,7 @@
 "preferences.toggle.removeKeymap" = "Remove keymap";
 "preferences.toggle.removeSetting" = "Remove settings";
 "preferences.toggle.removeEntitlements" = "Remove entitlements";
+"preferences.toggle.removePlayChain" = "Remove PlayChain";
 "preferences.button.pruneFiles" = "Prune Files";
 "preferences.prune.alert" = "Are you sure you want to prune all files?";
 "preferences.prune.message" = "This will remove all unused files including settings, keymappings, entitlements, and app data";
@@ -52,6 +54,7 @@
 "preferences.popover.badurl"  = "URL Invalid!";
 "preferences.popover.badjson" = "JSON Invalid or Not Found!";
 "preferences.popover.duplicate" = "Duplicate Link";
+"preferences.popover.checking" = "Checking URL";
 "preferences.textfield.url" = "Source URL...";
 "preferences.tab.install" = "Install";
 "preferences.toggle.showInstallPopup" = "Show install PlayTools popup";
@@ -96,6 +99,7 @@
 "alert.errorImportKm" = "Error occured when importing!";
 "alert.app.delete" = "All app data will be erased. You may need to download app files again. Do you wish to continue?";
 "alert.app.preferences" = "All in-app preferences will be deleted. Do you wish to continue?";
+"alert.app.clearPlayChain" = "All PlayChain data will be erased. You may need to login to the app again. Do you wish to continue?";
 "alert.restart" = "Please restart PlayCover.";
 "alert.error" = "An error occurred!";
 "alert.success" = "Success";
@@ -128,6 +132,9 @@
 "button.Help" = "Help";
 "button.Dismiss" = "Dismiss";
 "button.Reload" = "Reload";
+"button.Enable" = "Enable";
+"button.Reset" = "Reset";
+"button.Unlock" = "Unlock";
 
 "state.enabled" = "Enabled";
 "state.disabled" = "Disabled";
@@ -151,9 +158,11 @@
 "settings.tab.km" = "Keymapping";
 "settings.toggle.km" = "Keymapping";
 "settings.toggle.km.help" = "Add keyboard support to touch-only games. Use Command + K to open editor menu.";
-"settings.toggle.mm" = "Mouse mapping";
-"settings.toggle.mm.help" = "Add mouse controls that emulate touch movements. Use Command + K to open editor menu.";
 "settings.slider.mouseSensitivity" = "Mouse sensitivity: %.f";
+"settings.toggle.autoKM" = "Smart Keymap";
+"settings.toggle.autoKM.help" = "Automatically disable keymapping when text input is sensed";
+"settings.toggle.enableScrollWheel" = "Enable Scroll Wheel";
+"settings.toggle.enableScrollWheel.help" = "Enable scroll wheel in keymapping";
 
 "settings.tab.graphics" = "Graphics";
 "settings.picker.iosDevice" = "iOS device:";
@@ -166,9 +175,15 @@
 "settings.text.customWidth" = "Width";
 "settings.text.detectedResolution" = "Detected Resolution:";
 "settings.picker.aspectRatio" = "Aspect ratio:";
+"settings.picker.windowFix" = "Fix window display issues";
+"settings.picker.windowFix.help" = "Apply window fixes that may helps your apps display normally";
+"settings.picker.windowFixMethod.0" = "Normal";
+"settings.picker.windowFixMethod.1" = "Alternate";
 "settings.toggle.disableDisplaySleep" = "Disable display sleep";
 "settings.toggle.disableDisplaySleep.help" = "Prevent display from turning off while this app is running";
 "settings.noPlayTools" = "PlayTools is not installed in this app";
+"settings.highResolution" = "High resolution may cause crashing";
+"settings.picker.scaler" = "Resolution Scaler";
 
 "settings.tab.bypasses" = "Bypasses";
 "settings.toggle.jbBypass" = "Enable Jailbreak Bypass (Experimental)";
@@ -176,7 +191,10 @@
 "settings.playChain.enable" = "Enable PlayChain (Experimental)";
 "settings.playChain.help" = "Enable PlayChain support for this application, allowing it to (partially) use Apple Keychain Services";
 "settings.playChain.debugging" = "PlayChain debugging";
+"settings.toggle.introspection" = "Insert Introspection libraries";
+"settings.toggle.introspection.help" = "Add the system introspection libraries to the app. Known to fix issues with some apps not starting correctly";
 
+"settings.applicationCategoryType" = "Application Type";
 "settings.removePlayTools" = "Remove PlayTools";
 "settings.addToLaunchpad" = "Add to Launchpad";
 "settings.removeFromLaunchpad" = "Remove from Launchpad";
@@ -229,6 +247,8 @@
 "settings.text.debugger" = "Debugger:";
 "settings.toggle.lldb" = "Open with LLDB";
 "settings.toggle.lldbWithTerminal" = "Open in terminal";
+"settings.toggle.rootWorkDir" = "Start app at root directory";
+"settings.toggle.rootWorkDir.help" = "Change the working directory of the app to / just like on iOS. Turn this off if the app misbehave";
 
 "configSigning.header" = "Configure Package Signing";
 "configSigning.subtext" = "Package Signing helps fixing issues with apps that rely on \ncorrect Team IDs for operations like authorization. \nThere may be security risks associated with enabling this feature.\n\n As such, we recommend disabling it when it's not necessary";
@@ -247,3 +267,34 @@
 
 "configSigning.alert.copied" = "Command Copied!";
 "configSigning.alert.info" = "Please paste and run the command in Terminal.app. Your Mac will reboot after";
+
+"keycover.masterPassword" = "Master Password";
+"keycover.confirmMasterPassword" = "Confirm Master Password";
+"keycover.oldMasterPassword" = "Current Master Password";
+
+"keycover.error.blankPassword" = "Password cannot be blank";
+"keycover.error.notMatch" = "Passwords do not match";
+"keycover.error.incorrectPassword" = "Incorrect Password";
+
+"keycover.status.title" = "KeyCover Status:";
+"keycover.status.managedPassword" = "Enabled with Managed Password";
+"keycover.status.userPassword" = "Enabled with User Password";
+"keycover.status.chainCount" = "KeyCover Chain Status: ";
+"keycover.status.unlockedCount %@ %@" = "%@ unlocked chains in %@ total";
+"keycover.button.lockAll" = "Lock All Chains";
+"keycover.button.changePassword" = "Change Master Password";
+"keycover.toggle.startupPrompt" = "Prompt for KeyCover at startup";
+"keycover.toggle.startupPrompt.help" = "KeyCover will prompt for your master password when you launch the application. If this is disabled, it will be prompted when you launch an app that uses PlayChain.";
+
+"keycover.setup.useGeneratedKey" = "Managed Automatically";
+"keycover.setup.useUserKey" = "Use my own key";
+"keycover.setup.encryptionKey" = "Encryption Key: ";
+
+"keycover.setupPrompt.title" = "Enter a master password to use for KeyCover";
+"keycover.changePasswordPrompt.title" = "Enter your old master password and a new one to update your KeyCover encryption key";
+"keycover.removePrompt.title" = "Enter your master password to remove KeyCover encryption";
+
+"keycover.unlockPrompt.title" = "Enter your master password to unlock KeyCover";
+
+"keycover.alert.title" = "Keychain was not unlocked";
+"keycover.alert.content" = "Keychain access has been disabled for the current session";

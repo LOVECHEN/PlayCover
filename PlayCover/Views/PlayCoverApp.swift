@@ -6,19 +6,11 @@
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    @AppStorage("ShowLowPowerModeAlert") var showLowPowerModeAlert = true
+
     func application(_ application: NSApplication, open urls: [URL]) {
         if let url = urls.first {
-            if url.pathExtension == "ipa" {
-                uif.ipaUrl = url
-                Installer.install(ipaUrl: uif.ipaUrl!, export: false, returnCompletion: { _ in
-                    Task { @MainActor in
-                        AppsVM.shared.fetchApps()
-                        NotifyService.shared.notify(
-                            NSLocalizedString("notification.appInstalled", comment: ""),
-                            NSLocalizedString("notification.appInstalled.message", comment: ""))
-                    }
-                })
-            }
+            URLHandler.shared.processURL(url: url)
         }
     }
 
@@ -26,6 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.register(
             defaults: ["NSApplicationCrashOnExceptions": true]
         )
+
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(powerStateChanged),
                                                name: Notification.Name.NSProcessInfoPowerStateDidChange,
@@ -33,6 +26,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if ProcessInfo.processInfo.isLowPowerModeEnabled {
             powerModal()
         }
+        // Code that run once on first launch
+        let launchedBefore = UserDefaults.standard.bool(forKey: "launchedBefore")
+        if !launchedBefore {
+            UserDefaults.standard.set(true, forKey: "launchedBefore")
+
+            // Initialize KeyCover with an automatically generated key
+            let keyCoverPassword = KeyCoverPassword.shared.generateVerySecurePassword()
+            KeyCoverPassword.shared.setKeyCoverPassword(keyCoverPassword)
+            KeyCoverPreferences.shared.keyCoverEnabled = .selfGeneratedPassword
+        }
+
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -48,12 +52,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func powerModal() {
-        let alert = NSAlert()
-        alert.messageText = NSLocalizedString("alert.power.title", comment: "")
-        alert.informativeText = NSLocalizedString("alert.power.subtitle", comment: "")
-        alert.addButton(withTitle: NSLocalizedString("button.OK", comment: ""))
-        alert.alertStyle = .critical
-        alert.runModal()
+        if showLowPowerModeAlert {
+            let alert = NSAlert()
+            alert.messageText = NSLocalizedString("alert.power.title", comment: "")
+            alert.informativeText = NSLocalizedString("alert.power.subtitle", comment: "")
+            alert.addButton(withTitle: NSLocalizedString("button.OK", comment: ""))
+            alert.showsSuppressionButton = true
+            alert.alertStyle = .critical
+
+            if alert.runModal() == .alertFirstButtonReturn {
+                showLowPowerModeAlert = alert.suppressionButton?.state == .off
+            }
+        }
     }
 }
 

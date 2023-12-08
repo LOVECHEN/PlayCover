@@ -18,6 +18,7 @@ struct PlayAppView: View {
     @State private var showClearCacheAlert = false
     @State private var showClearCacheToast = false
     @State private var showClearPreferencesAlert = false
+    @State private var showClearPlayChainAlert = false
 
     @State var showImportSuccess = false
     @State var showImportFail = false
@@ -36,7 +37,10 @@ struct PlayAppView: View {
                 if app.info.bundleIdentifier == "com.miHoYo.GenshinImpact" {
                     removeTwitterSessionCookie()
                 }
-                app.launch()
+                // Launch the app from a separate thread (allow us to Sayori it if needed)
+                Task(priority: .userInitiated) {
+                    if !app.isStarting { await app.launch() }
+                }
             })
             .simultaneousGesture(TapGesture().onEnded {
                 selected = app
@@ -98,17 +102,26 @@ struct PlayAppView: View {
                     }
                 }
                 Divider()
+                Group {
+                    Button(action: {
+                        showClearCacheAlert.toggle()
+                    }, label: {
+                        Text("playapp.clearCache")
+                    })
+                    Button(action: {
+                        showClearPreferencesAlert.toggle()
+                    }, label: {
+                        Text("playapp.clearPreferences")
+                    })
+                    Button(action: {
+                        showClearPlayChainAlert.toggle()
+                    }, label: {
+                        Text("playapp.clearPlayChain")
+                    })
+                }
+                Divider()
                 Button(action: {
-                    showClearCacheAlert.toggle()
-                }, label: {
-                    Text("playapp.clearCache")
-                })
-                Button(action: {
-                    showClearPreferencesAlert.toggle()
-                }, label: {
-                    Text("playapp.clearPreferences")
-                })
-                Button(action: {
+                    selected = nil
                     Uninstaller.uninstallPopup(app)
                 }, label: {
                     Text("playapp.delete")
@@ -124,16 +137,23 @@ struct PlayAppView: View {
                 DeleteGenshinAccountView()
             }
             .alert("alert.app.delete", isPresented: $showClearCacheAlert) {
-                Button("button.Proceed", role: .cancel) {
+                Button("button.Proceed", role: .destructive) {
                     app.clearAllCache()
                     showClearCacheToast.toggle()
                 }
                 Button("button.Cancel", role: .cancel) { }
             }
             .alert("alert.app.preferences", isPresented: $showClearPreferencesAlert) {
-                Button("button.Proceed", role: .cancel) {
+                Button("button.Proceed", role: .destructive) {
                     deletePreferences(app: app.info.bundleIdentifier)
                     showClearPreferencesAlert.toggle()
+                }
+                Button("button.Cancel", role: .cancel) { }
+            }
+            .alert("alert.app.clearPlayChain", isPresented: $showClearPlayChainAlert) {
+                Button("button.Proceed", role: .destructive) {
+                    app.clearPlayChain()
+                    showClearPlayChainAlert.toggle()
                 }
                 Button("button.Cancel", role: .cancel) { }
             }
@@ -219,9 +239,13 @@ struct PlayAppConditionalView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                         } else {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                                .frame(width: 60, height: 60)
+                            Rectangle()
+                                 .fill(.regularMaterial)
+                                 .overlay {
+                                     ProgressView()
+                                         .progressViewStyle(.circular)
+                                         .controlSize(.small)
+                                 }
                         }
                     }
                     .frame(width: 30, height: 30)
@@ -258,8 +282,12 @@ struct PlayAppConditionalView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                         } else {
-                            ProgressView()
-                                .progressViewStyle(.circular)
+                            Rectangle()
+                                 .fill(.regularMaterial)
+                                 .overlay {
+                                     ProgressView()
+                                         .progressViewStyle(.circular)
+                                 }
                         }
                     }
                     .cornerRadius(15)
